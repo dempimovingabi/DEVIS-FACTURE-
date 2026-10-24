@@ -27,7 +27,6 @@ function updateHeaderStyle() {
         el.style.fontWeight = isBold ? 'bold' : 'normal';
         el.style.fontStyle = isItalic ? 'italic' : 'normal';
         
-        // Nettoyer les anciennes classes WordArt
         el.className = 'main-title'; 
         if(wordart !== 'none') el.classList.add(wordart);
     });
@@ -61,7 +60,7 @@ function toggleCellSelection() {
 }
 
 function selectCell(e) {
-    if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; // Ignorer les clics sur les inputs
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; 
     e.target.classList.toggle('selected-cell');
 }
 
@@ -69,7 +68,7 @@ function applyCellColor() {
     const color = document.getElementById('table-cell-color').value;
     document.querySelectorAll('.custom-table td.selected-cell').forEach(td => {
         td.style.backgroundColor = color;
-        td.classList.remove('selected-cell'); // Désélectionner après application
+        td.classList.remove('selected-cell'); 
     });
 }
 
@@ -131,7 +130,6 @@ function renderTable(type) {
         tbody.appendChild(tr);
     });
     
-    // Réattacher les événements de sélection si le mode est actif
     if (isSelectingCells) {
         document.querySelectorAll('.custom-table td').forEach(td => td.addEventListener('click', selectCell));
     }
@@ -141,7 +139,6 @@ function renderTable(type) {
 function updateLine(type, index, field, value) {
     const data = type === 'devis' ? devisData : factureData;
     data[index][field] = (field === 'qte' || field === 'pu') ? parseFloat(value) || 0 : value;
-    // Mise à jour du PT spécifique pour éviter le clignotement
     const row = document.getElementById(`tbody-${type}`).children[index];
     row.querySelector('.pt-cell').innerText = (data[index].qte * data[index].pu).toFixed(2);
     calculerTotaux(type);
@@ -168,7 +165,6 @@ function calculerTotaux(type) {
     let sousTotal = 0;
     data.forEach(item => { sousTotal += (item.qte * item.pu); });
     
-    // Gestion du pourcentage de main d'œuvre
     const pctInput = document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-main-oeuvre-pct`);
     const valInput = document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-main-oeuvre-val`);
     
@@ -236,21 +232,19 @@ function convertirEntier(n) {
     return n.toString();
 }
 
-// --- SIGNATURE TACTILE (Fixée) ---
+// --- SIGNATURE TACTILE ---
 function initSignature(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let drawing = false;
 
-    // Configuration stricte pour mobile et desktop
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000';
 
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
-        // Calcul du ratio pour compenser si le CSS redimensionne le canvas
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         
@@ -267,13 +261,11 @@ function initSignature(canvasId) {
     const move = (e) => { e.preventDefault(); if (!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); };
     const end = (e) => { e.preventDefault(); drawing = false; };
 
-    // Mouse events
     canvas.addEventListener('mousedown', start);
     canvas.addEventListener('mousemove', move);
     canvas.addEventListener('mouseup', end);
     canvas.addEventListener('mouseout', end);
     
-    // Touch events (passive: false est crucial pour preventDefault)
     canvas.addEventListener('touchstart', start, { passive: false });
     canvas.addEventListener('touchmove', move, { passive: false });
     canvas.addEventListener('touchend', end);
@@ -290,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable('devis');
     renderTable('facture');
     
-    // Initialisation des signatures
     initSignature('canvas-devis');
     initSignature('canvas-facture');
 

@@ -6,13 +6,9 @@ function toggleMenu() {
 function switchTab(tab, btnElement) {
     document.querySelectorAll('.document-container').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    
     document.getElementById('module-' + tab).classList.add('active');
     if(btnElement) btnElement.classList.add('active');
-    
-    toggleMenu(); // Ferme le menu après sélection
-    // Réinitialise la taille des canvas quand le module devient visible
-    setTimeout(() => resizeCanvas('canvas-' + tab), 50); 
+    toggleMenu();
 }
 
 // --- PERSONNALISATION ENTETE ---
@@ -20,17 +16,60 @@ function updateHeaderStyle() {
     const font = document.getElementById('header-font').value;
     const size = document.getElementById('header-size').value + 'px';
     const color = document.getElementById('header-color').value;
-    const isWordArt = document.getElementById('header-wordart').checked;
+    const isBold = document.getElementById('header-bold').checked;
+    const isItalic = document.getElementById('header-italic').checked;
+    const wordart = document.getElementById('header-wordart').value;
 
     document.querySelectorAll('.main-title').forEach(el => {
         el.style.fontFamily = font;
         el.style.fontSize = size;
-        el.style.color = isWordArt ? '' : color; // Le WordArt utilise un dégradé
-        if(isWordArt) {
-            el.classList.add('wordart-effect');
+        el.style.color = (wordart === 'none') ? color : '';
+        el.style.fontWeight = isBold ? 'bold' : 'normal';
+        el.style.fontStyle = isItalic ? 'italic' : 'normal';
+        
+        // Nettoyer les anciennes classes WordArt
+        el.className = 'main-title'; 
+        if(wordart !== 'none') el.classList.add(wordart);
+    });
+}
+
+// --- PERSONNALISATION TABLEAU ---
+let isSelectingCells = false;
+
+function updateTableStyle() {
+    const font = document.getElementById('table-font').value;
+    const size = document.getElementById('table-size').value + 'px';
+    const color = document.getElementById('table-color').value;
+
+    document.documentElement.style.setProperty('--table-font', font);
+    document.documentElement.style.setProperty('--table-size', size);
+    document.documentElement.style.setProperty('--table-color', color);
+}
+
+function toggleCellSelection() {
+    isSelectingCells = !isSelectingCells;
+    const btn = document.getElementById('btn-select-cells');
+    btn.style.background = isSelectingCells ? '#4CAF50' : '#555';
+    
+    document.querySelectorAll('.custom-table td').forEach(td => {
+        if(isSelectingCells) {
+            td.addEventListener('click', selectCell);
         } else {
-            el.classList.remove('wordart-effect');
+            td.removeEventListener('click', selectCell);
         }
+    });
+}
+
+function selectCell(e) {
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; // Ignorer les clics sur les inputs
+    e.target.classList.toggle('selected-cell');
+}
+
+function applyCellColor() {
+    const color = document.getElementById('table-cell-color').value;
+    document.querySelectorAll('.custom-table td.selected-cell').forEach(td => {
+        td.style.backgroundColor = color;
+        td.classList.remove('selected-cell'); // Désélectionner après application
     });
 }
 
@@ -41,7 +80,10 @@ function previewImage(input, imgId) {
         reader.onload = function (e) {
             const img = document.getElementById(imgId);
             img.src = e.target.result;
-            if(imgId === 'img-sceau') img.style.display = 'block';
+            if(imgId === 'img-sceau') {
+                img.style.display = 'block';
+                document.getElementById('stamp-placeholder').style.display = 'none';
+            }
         };
         reader.readAsDataURL(input.files[0]);
     }
@@ -51,17 +93,7 @@ function previewImage(input, imgId) {
 let devisData = [
     { qte: 2, lib: "Boites email Gris", pu: 30 },
     { qte: 3, lib: "Boites email blanc", pu: 30 },
-    { qte: 3, lib: "Sceaux latex PDF", pu: 55 },
-    { qte: 5, lib: "Boites email PDF", pu: 30 },
-    { qte: 8, lib: "Litres pétrole", pu: 3 },
-    { qte: 5, lib: "Rouleaux", pu: 3 },
-    { qte: 5, lib: "Roulettes", pu: 2 },
-    { qte: 2, lib: "Sceaux latex blanc", pu: 55 },
-    { qte: 2, lib: "Boites email noir", pu: 30 },
-    { qte: 3, lib: "Boites vernis", pu: 30 },
-    { qte: 5, lib: "Pièces colorants", pu: 3 },
-    { qte: 6, lib: "Brosses", pu: 2 },
-    { qte: 2, lib: "Sceaux vides", pu: 3 }
+    { qte: 3, lib: "Sceaux latex PDF", pu: 55 }
 ];
 
 let factureData = [
@@ -98,13 +130,21 @@ function renderTable(type) {
         }
         tbody.appendChild(tr);
     });
+    
+    // Réattacher les événements de sélection si le mode est actif
+    if (isSelectingCells) {
+        document.querySelectorAll('.custom-table td').forEach(td => td.addEventListener('click', selectCell));
+    }
     calculerTotaux(type);
 }
 
 function updateLine(type, index, field, value) {
     const data = type === 'devis' ? devisData : factureData;
     data[index][field] = (field === 'qte' || field === 'pu') ? parseFloat(value) || 0 : value;
-    renderTable(type);
+    // Mise à jour du PT spécifique pour éviter le clignotement
+    const row = document.getElementById(`tbody-${type}`).children[index];
+    row.querySelector('.pt-cell').innerText = (data[index].qte * data[index].pu).toFixed(2);
+    calculerTotaux(type);
 }
 
 function ajouterLigne(type) {
@@ -122,19 +162,24 @@ function deleteLine(type, index) {
     }
 }
 
-// --- CALCULS ET CONVERSION LETTRES ---
+// --- CALCULS ---
 function calculerTotaux(type) {
     const data = type === 'devis' ? devisData : factureData;
     let sousTotal = 0;
-    
     data.forEach(item => { sousTotal += (item.qte * item.pu); });
     
-    const mainOeuvre = parseFloat(document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-main-oeuvre`).value) || 0;
-    const totalGlobal = sousTotal + mainOeuvre;
+    // Gestion du pourcentage de main d'œuvre
+    const pctInput = document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-main-oeuvre-pct`);
+    const valInput = document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-main-oeuvre-val`);
+    
+    const pourcentage = parseFloat(pctInput.value) || 0;
+    const mainOeuvreVal = sousTotal * (pourcentage / 100);
+    valInput.value = mainOeuvreVal.toFixed(2);
+
+    const totalGlobal = sousTotal + mainOeuvreVal;
 
     if(type === 'devis') {
         document.getElementById('dev-total').innerText = sousTotal.toFixed(2);
-        document.getElementById('dev-totaux').innerText = totalGlobal.toFixed(2);
         document.getElementById('dev-global').innerText = totalGlobal.toFixed(2);
     } else {
         document.getElementById('fact-sous-total').innerText = sousTotal.toFixed(2);
@@ -149,22 +194,16 @@ function changeDevise(type) {
     calculerTotaux(type);
 }
 
+// --- CONVERSION LETTRES ---
 function genererLettres(nombre, type) {
     const deviseSelect = document.getElementById(`devise-${type}`).value;
     const nomDevise = deviseSelect === '$' ? "Dollars américains" : "Francs congolais";
     
     let entier = Math.floor(nombre);
     let decimal = Math.round((nombre - entier) * 100);
-    
-    // Si le décimal est un multiple de 10 (ex: 0.4 devient 40), on le lit comme un entier basique
-    let texteDecimal = "";
-    if (decimal > 0) {
-        texteDecimal = decimal < 10 ? `, zéro ${convertirEntier(decimal)}` : `, ${convertirEntier(decimal)}`;
-    }
+    let texteDecimal = decimal > 0 ? `, ${decimal < 10 ? 'zéro ' : ''}${convertirEntier(decimal)}` : "";
     
     let texte = `${nomDevise} ${convertirEntier(entier)}${texteDecimal}`;
-    
-    // Formatage propre
     texte = texte.charAt(0).toUpperCase() + texte.slice(1).toLowerCase();
     
     document.getElementById(`${type === 'devis' ? 'dev' : 'fact'}-lettres`).innerText = texte;
@@ -197,39 +236,30 @@ function convertirEntier(n) {
     return n.toString();
 }
 
-// --- SIGNATURE TACTILE CORRIGÉE ---
-const canvasStates = {};
-
-function resizeCanvas(canvasId) {
+// --- SIGNATURE TACTILE (Fixée) ---
+function initSignature(canvasId) {
     const canvas = document.getElementById(canvasId);
-    if(!canvas) return;
-    // On force une taille fixe pour éviter que le dessin soit décalé
-    if(canvas.width !== 250 || canvas.height !== 100) {
-        canvas.width = 250;
-        canvas.height = 100;
-        initSignatureDrawing(canvasId);
-    }
-}
-
-function initSignatureDrawing(canvasId) {
-    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
-    // Configuration du style du trait
+    let drawing = false;
+
+    // Configuration stricte pour mobile et desktop
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000000';
-
-    let drawing = false;
+    ctx.strokeStyle = '#000';
 
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
+        // Calcul du ratio pour compenser si le CSS redimensionne le canvas
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        // Calcul précis prenant en compte le redimensionnement CSS
+
         return { 
-            x: (clientX - rect.left) * (canvas.width / rect.width), 
-            y: (clientY - rect.top) * (canvas.height / rect.height) 
+            x: (clientX - rect.left) * scaleX, 
+            y: (clientY - rect.top) * scaleY 
         };
     };
 
@@ -237,19 +267,16 @@ function initSignatureDrawing(canvasId) {
     const move = (e) => { e.preventDefault(); if (!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); };
     const end = (e) => { e.preventDefault(); drawing = false; };
 
-    // Nettoyer les anciens écouteurs (si réinitialisation)
-    canvas.replaceWith(canvas.cloneNode(true)); 
-    const newCanvas = document.getElementById(canvasId);
-    const newCtx = newCanvas.getContext('2d');
-    newCtx.lineWidth = 2; newCtx.lineCap = 'round'; newCtx.strokeStyle = '#000000';
-
-    newCanvas.addEventListener('mousedown', start);
-    newCanvas.addEventListener('mousemove', move);
-    newCanvas.addEventListener('mouseup', end);
-    newCanvas.addEventListener('mouseout', end);
-    newCanvas.addEventListener('touchstart', start, { passive: false });
-    newCanvas.addEventListener('touchmove', move, { passive: false });
-    newCanvas.addEventListener('touchend', end);
+    // Mouse events
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseout', end);
+    
+    // Touch events (passive: false est crucial pour preventDefault)
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
 }
 
 function clearCanvas(canvasId) {
@@ -263,18 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable('devis');
     renderTable('facture');
     
-    // Initialiser les canvas avec un léger délai
-    setTimeout(() => {
-        resizeCanvas('canvas-devis');
-        resizeCanvas('canvas-facture');
-    }, 100);
+    // Initialisation des signatures
+    initSignature('canvas-devis');
+    initSignature('canvas-facture');
 
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Chemin absolu avec le nom exact de votre dépôt
-        navigator.serviceWorker.register('/DEVIS-FACTURE/sw.js') 
-            .then(reg => console.log('Service Worker enregistré avec succès'))
-            .catch(err => console.error('Erreur SW:', err));
-    });
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/DEVIS-FACTURE-/sw.js').catch(err => console.log('SW Error', err));
+        });
     }
 });

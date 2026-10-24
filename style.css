@@ -1,7 +1,7 @@
 * { box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
 body { background: #f0f0f0; margin: 0; padding: 20px; padding-top: 60px; }
 
-/* Menu Hamburger et Menu Latéral */
+/* Menu Hamburger */
 #hamburger {
     position: fixed; top: 10px; left: 10px; font-size: 28px; cursor: pointer; 
     background: #fff; padding: 5px 12px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;
@@ -27,7 +27,7 @@ body { background: #f0f0f0; margin: 0; padding: 20px; padding-top: 60px; }
 }
 .document-container.active { display: block; }
 
-/* Entête */
+/* Entête & Contenu Modifiable */
 .entete { display: flex; justify-content: space-between; align-items: center; text-align: center; }
 .logo-box { width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; position: relative; }
 .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -37,6 +37,12 @@ body { background: #f0f0f0; margin: 0; padding: 20px; padding-top: 60px; }
 .entete-centre h2 { font-size: 26px; margin: 5px 0; color: #333; letter-spacing: 2px; transition: all 0.3s; }
 .entete-centre h3 { font-size: 18px; margin: 0; color: #666; letter-spacing: 5px; }
 .entete-centre p { font-size: 10px; margin: 2px 0; }
+
+/* Rendre les textes modifiables interactifs */
+[contenteditable="true"] { outline: none; transition: background 0.2s; border-radius: 3px; }
+[contenteditable="true"]:hover { background-color: #f0f0f0; cursor: text; }
+[contenteditable="true"]:focus { background-color: #e0e0e0; }
+
 hr { border: 1px solid #000; margin: 15px 0; }
 
 /* Styles WordArt */
@@ -45,16 +51,6 @@ hr { border: 1px solid #000; margin: 15px 0; }
 .wa-3d { color: #333; text-shadow: 1px 1px 0px #ccc, 2px 2px 0px #ccc, 3px 3px 0px #ccc, 4px 4px 0px #ccc; }
 .wa-outline { color: transparent; -webkit-text-stroke: 1px #000; }
 .wa-shadow { color: #444; text-shadow: 3px 3px 5px rgba(0,0,0,0.5); }
-
-/* Mise en page des infos */
-.doc-header-info { margin-bottom: 15px; }
-.info-row { margin-bottom: 8px; }
-.right-align { text-align: right; }
-.left-align { text-align: left; }
-.flex-row { display: flex; align-items: flex-start; gap: 10px; }
-.input-textarea { flex: 1; border: none; border-bottom: 1px dotted #999; font-family: inherit; font-size: inherit; background: transparent; resize: none; overflow: hidden; min-height: 20px; padding: 2px; }
-.input-inline { border: none; border-bottom: 1px solid #999; font-family: inherit; font-size: inherit; background: transparent; padding: 2px; }
-.text-center { text-align: center; }
 
 /* Tableaux */
 .custom-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-family: var(--table-font, 'Times New Roman'); font-size: var(--table-size, 14px); color: var(--table-color, #000); }
@@ -71,26 +67,20 @@ hr { border: 1px solid #000; margin: 15px 0; }
 .table-totaux td { font-weight: bold; padding: 4px; }
 .table-totaux td:last-child { text-align: right; padding-right: 15px; }
 .table-totaux input { text-align: right; border: 1px solid #ccc; font-family: inherit; }
-
 .montant-lettres { margin-top: 20px; font-size: 15px; min-height: 40px; }
 
 /* Signatures et Sceau */
-.signature-section { margin-top: 30px; position: relative; }
-.nom-signataire { font-weight: bold; font-style: italic; font-size: 18px; margin-top: 10px; text-align: right; }
+.signature-section { position: relative; }
 .canvas-container { position: relative; display: inline-block; }
 .signature-pad { border: 1px dashed #999; background: #fff; touch-action: none; cursor: crosshair; display: block; width: 300px; height: 120px; }
-
-.facture-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-.facture-text { text-align: left; }
-.facture-sig-zone { display: flex; align-items: flex-end; gap: 20px; }
 .stamp-area { width: 120px; height: 120px; border: 1px dashed #999; display: flex; justify-content: center; align-items: center; text-align: center; cursor: pointer; position: relative; }
 .stamp-area img { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0.8; }
-#stamp-placeholder { font-size: 10px; color: #888; }
+#stamp-placeholder { font-size: 11px; color: #888; }
 
 @media print {
     body { background: #fff; padding: 0; }
     .no-print { display: none !important; }
     .document-container { box-shadow: none; width: 100%; padding: 0; margin: 0; min-height: auto; }
-    .signature-pad { border: none; }
-    .stamp-area { border: none; }
+    .signature-pad, .stamp-area { border: none; }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus { background-color: transparent; }
 }

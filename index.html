@@ -66,24 +66,25 @@
         <label>Taille texte : <input type="number" id="table-size" value="14" min="8" max="24" oninput="updateTableStyle()"></label>
         <label>Couleur texte : <input type="color" id="table-color" value="#000000" onchange="updateTableStyle()"></label>
         <label>Couleur cases : <input type="color" id="table-cell-color" value="#ffffff"></label>
-        <button class="btn-action" onclick="toggleCellSelection()" id="btn-select-cells" style="background:#555;">Activer Sélection Cases</button>
-        <button class="btn-action" onclick="applyCellColor()" style="background:#2196F3;">Colorier Cases Sélectionnées</button>
+        <button class="btn-action" onclick="toggleCellSelection()" id="btn-select-cells" style="background:#555;">Sélectionner des cases</button>
+        <button class="btn-action" onclick="applyCellColor()" style="background:#2196F3;">Colorier cases sélectionnées</button>
     </div>
 
     <!-- MODULE DEVIS -->
     <div id="module-devis" class="document-container active">
+        <!-- EN-TÊTE MODIFIABLE (contenteditable="true" permet de cliquer et taper) -->
         <header class="entete">
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-gauche')">
                 <img id="img-gauche" src="icon-192x192.png" alt="Logo Gauche">
             </div>
             <div class="entete-centre header-target">
-                <h1>Agence de Publicité</h1>
-                <h2 class="main-title">DEMPI MOVING-ABI</h2>
-                <h3>ALL ART</h3>
-                <p>N° Impôt : A1605507E &nbsp;|&nbsp; N° Compte bancaire 'FBNBank' : 3013014185411</p>
-                <p>Tél : +24382 622 2264 - +24397 628 69 29 &nbsp;|&nbsp; Email : dedickmpiana@gmail.com</p>
-                <p><em>Services rendus : Peintures (murale, bâtiment), portrait, sérigraphie (impression T-shirt, banderole, vareuse, cachet...), panneau de visibilité, menuiserie, maçonnerie</em></p>
+                <h1 contenteditable="true">Agence de Publicité</h1>
+                <h2 class="main-title" contenteditable="true">DEMPI MOVING-ABI</h2>
+                <h3 contenteditable="true">ALL ART</h3>
+                <p contenteditable="true">N° Impôt : A1605507E &nbsp;|&nbsp; N° Compte bancaire 'FBNBank' : 3013014185411</p>
+                <p contenteditable="true">Tél : +24382 622 2264 - +24397 628 69 29 &nbsp;|&nbsp; Email : dedickmpiana@gmail.com</p>
+                <p contenteditable="true"><em>Services rendus : Peintures (murale, bâtiment), portrait, sérigraphie (impression T-shirt, banderole, vareuse, cachet...), panneau de visibilité, menuiserie, maçonnerie</em></p>
             </div>
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-droite')">
@@ -93,21 +94,15 @@
 
         <hr>
 
-        <!-- Nouvelle disposition demandée -->
-        <div class="doc-header-info">
-            <div class="info-row right-align">
-                <h3>Kananga, le <input type="date" class="input-inline"></h3>
-            </div>
-            <div class="info-row left-align">
-                <h3>DEVIS PROFORMA N° <input type="text" value="530" class="input-inline" style="width: 60px;"></h3>
-            </div>
-            <div class="info-row flex-row">
-                <strong>TRAVAIL A REALISER :</strong> 
-                <textarea class="input-textarea auto-resize" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">RAFRAICHISSEMENT BATIMENTS : MISE DE LA PEINTURE (INTERIEUR) KAMAYI</textarea>
-            </div>
-            <div class="info-row">
-                <strong>CLIENT :</strong> <input type="text" value="SOCOC" class="input-inline" style="width: 200px;">
-            </div>
+        <!-- DISPOSITION D'ORIGINE RETROUVÉE -->
+        <div class="titre-section" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>DEVIS PROFORMA N° <input type="text" value="530" class="input-inline" style="width: 50px;"></h3>
+            <h3>Kananga, le <input type="date" class="input-inline"></h3>
+        </div>
+
+        <div class="travail-section" style="margin-top: 15px;">
+            <p style="margin-bottom: 5px;"><strong>TRAVAIL A REALISER :</strong> <input type="text" value="RAFRAICHISSEMENT BATIMENTS : MISE DE LA PEINTURE (INTERIEUR) KAMAYI" class="input-full"></p>
+            <p><strong>CLIENT :</strong> <input type="text" value="SOCOC" class="input-inline" style="width: 250px;"></p>
         </div>
 
         <table id="table-devis" class="custom-table">
@@ -138,13 +133,17 @@
 
         <p class="montant-lettres"><em>Nous disons : <span id="dev-lettres"></span></em></p>
 
-        <div class="signature-section">
-            <p>Fait à <input type="text" value="Kananga" class="input-inline" style="width: 100px;">, le <input type="date" class="input-inline"></p>
-            <p class="nom-signataire">Dedick MPIANA</p>
-            <div class="canvas-container">
-                <!-- Canvas avec dimensions fixes pour éviter le bug -->
-                <canvas id="canvas-devis" class="signature-pad" width="300" height="120"></canvas>
-                <button class="no-print clear-btn" onclick="clearCanvas('canvas-devis')">Effacer</button>
+        <!-- SIGNATURE DEVIS : CENTRÉE SOUS LE NOM -->
+        <div class="signature-section" style="text-align: center; margin-top: 40px;">
+            <p style="text-align: right;">Fait à <input type="text" value="Kananga" class="input-inline" style="width: 100px;">, le <input type="date" class="input-inline"></p>
+            <div style="margin-top: 20px;">
+                <p style="font-weight: bold; font-style: italic; font-size: 18px;">
+                    <input type="text" value="Dedick MPIANA" class="input-inline" style="text-align: center; width: 250px; font-weight: bold; font-style: italic; font-size: 18px;">
+                </p>
+                <div class="canvas-container" style="margin-top: 5px;">
+                    <canvas id="canvas-devis" class="signature-pad" width="300" height="120"></canvas>
+                    <button class="no-print clear-btn" onclick="clearCanvas('canvas-devis')">Effacer</button>
+                </div>
             </div>
         </div>
     </div>
@@ -157,12 +156,12 @@
                 <img id="img-gauche-f" src="icon-192x192.png" alt="Logo Gauche">
             </div>
             <div class="entete-centre header-target">
-                <h1>Agence de Publicité</h1>
-                <h2 class="main-title">DEMPI MOVING</h2>
-                <h3>ALL ART</h3>
-                <p>Tél : +24382 6222264 - +24397 628 69 29 &nbsp;|&nbsp; N° Compte FBNBank : 30130141854-11</p>
-                <p>Email : dedickmpiana@gmail.com</p>
-                <p><em>Services rendus : Peintures (murale, bâtiment), portrait, sérigraphie (impression T-shirt, banderole, vareuse, cachet...), panneau de visibilité, menuiserie, maçonnerie</em></p>
+                <h1 contenteditable="true">Agence de Publicité</h1>
+                <h2 class="main-title" contenteditable="true">DEMPI MOVING</h2>
+                <h3 contenteditable="true">ALL ART</h3>
+                <p contenteditable="true">Tél : +24382 6222264 - +24397 628 69 29 &nbsp;|&nbsp; N° Compte FBNBank : 30130141854-11</p>
+                <p contenteditable="true">Email : dedickmpiana@gmail.com</p>
+                <p contenteditable="true"><em>Services rendus : Peintures (murale, bâtiment), portrait, sérigraphie (impression T-shirt, banderole, vareuse, cachet...), panneau de visibilité, menuiserie, maçonnerie</em></p>
             </div>
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-droite-f')">
@@ -172,17 +171,13 @@
 
         <hr>
         
-        <div class="doc-header-info">
-            <div class="info-row right-align">
-                <h3>Kananga, le <input type="date" value="2022-10-01" class="input-inline"></h3>
-            </div>
-            <div class="info-row left-align">
-                <h3>FACTURE N° <input type="text" value="923" class="input-inline" style="width: 60px;"></h3>
-            </div>
-            <div class="info-row flex-row">
-                <strong>CONCERNE :</strong> 
-                <textarea class="input-textarea auto-resize" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">Ajout d'argent sur les travaux de peinture suite à la hausse des prix sur le marché, au siège FBNBank sarl à Kananga</textarea>
-            </div>
+        <div class="titre-section" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>FACTURE N°<input type="text" value="923" class="input-inline" style="width: 60px;"></h3>
+            <h3>Kananga, le <input type="date" value="2022-10-01" class="input-inline"></h3>
+        </div>
+        
+        <div class="travail-section" style="margin-top: 15px;">
+            <p><strong>Concerne :</strong> <input type="text" value="Ajout d'argent sur les travaux de peinture suite à la hausse des prix sur le marché, au siège FBNBank sarl à Kananga" class="input-full"></p>
         </div>
 
         <table id="table-facture" class="custom-table">
@@ -214,21 +209,27 @@
 
         <p class="montant-lettres"><em>Nous disons : <span id="fact-lettres"></span></em></p>
 
-        <div class="signature-section facture-sign">
-            <!-- Nouvelle disposition : Texte à gauche, Sceau et Signature à droite -->
-            <div class="facture-bottom">
-                <div class="facture-text">
-                    <p>Pour DEMPI MOVING<br><strong>Dedick MPIANA</strong><br>Artiste décorateur sérigraphe</p>
-                </div>
-                <div class="facture-sig-zone">
-                    <div class="stamp-area" onclick="document.getElementById('file-sceau').click()">
-                        <input type="file" id="file-sceau" accept="image/*" style="display:none;" onchange="previewImage(this, 'img-sceau')">
-                        <img id="img-sceau" src="" alt="Sceau" style="display:none;">
-                        <span class="no-print" id="stamp-placeholder">Cliquez pour ajouter le sceau</span>
-                    </div>
+        <!-- SIGNATURE FACTURE : CENTRÉE SOUS LE NOM -->
+        <div class="signature-section" style="text-align: center; margin-top: 30px;">
+            <p style="text-align: right;">Fait à <input type="text" value="Kananga" class="input-inline" style="width: 100px;">, le <input type="date" value="2022-10-01" class="input-inline"></p>
+            <div style="margin-top: 20px;">
+                <p>Pour DEMPI MOVING</p>
+                <p>
+                    <input type="text" value="Dedick MPIANA" class="input-inline" style="text-align: center; width: 250px; font-weight: bold; font-style: italic; font-size: 18px;">
+                </p>
+                <p>Artiste décorateur sérigraphe</p>
+                
+                <div style="display: flex; justify-content: center; align-items: flex-start; gap: 30px; margin-top: 15px;">
+                    <!-- Signature -->
                     <div class="canvas-container">
                         <canvas id="canvas-facture" class="signature-pad" width="300" height="120"></canvas>
                         <button class="no-print clear-btn" onclick="clearCanvas('canvas-facture')">Effacer</button>
+                    </div>
+                    <!-- Sceau -->
+                    <div class="stamp-area" onclick="document.getElementById('file-sceau').click()">
+                        <input type="file" id="file-sceau" accept="image/*" style="display:none;" onchange="previewImage(this, 'img-sceau')">
+                        <img id="img-sceau" src="" alt="Sceau" style="display:none;">
+                        <span class="no-print" id="stamp-placeholder">Cliquez pour<br>ajouter le sceau</span>
                     </div>
                 </div>
             </div>
@@ -237,4 +238,4 @@
 
     <script src="app.js"></script>
 </body>
-    </html>
+                        </html>

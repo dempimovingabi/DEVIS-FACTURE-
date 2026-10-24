@@ -270,8 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error', err));
-        });
+    window.addEventListener('load', () => {
+        // Chemin absolu avec le nom exact de votre dépôt
+        navigator.serviceWorker.register('/DEVIS-FACTURE/sw.js') 
+            .then(reg => console.log('Service Worker enregistré avec succès'))
+            .catch(err => console.error('Erreur SW:', err));
+    });
     }
 });

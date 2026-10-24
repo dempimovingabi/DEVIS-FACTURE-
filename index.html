@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DEMPI MOVING - Devis & Facture</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -10,29 +10,64 @@
 </head>
 <body>
 
-    <!-- Bouton Menu Hamburger (3 lignes) -->
+    <!-- Bouton Menu Hamburger -->
     <div id="hamburger" class="no-print" onclick="toggleMenu()">☰</div>
 
-    <!-- Menu Caché (Personnalisation & Navigation) -->
+    <!-- Menu Caché -->
     <div id="side-menu" class="no-print">
-        <h3>Menu</h3>
+        <h3>Navigation</h3>
         <button class="tab-btn active" onclick="switchTab('devis', this)">📄 Module Devis</button>
         <button class="tab-btn" onclick="switchTab('facture', this)">🧾 Module Facture</button>
-        <button class="btn-action" onclick="window.print()">🖨️ Aperçu / Générer PDF</button>
+        <button class="btn-action" onclick="window.print()">🖨️ Aperçu / PDF</button>
         
-        <hr style="margin: 15px 0;">
-        <h4>Personnalisation de l'entête</h4>
+        <hr>
+        <h4>Style de l'Entête</h4>
         <label>Police : 
             <select id="header-font" onchange="updateHeaderStyle()">
                 <option value="Times New Roman">Times New Roman</option>
                 <option value="Arial">Arial</option>
-                <option value="Courier New">Courier</option>
+                <option value="Arial Black">Arial Black</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Century Gothic">Century Gothic</option>
+                <option value="Franklin Gothic Medium">Franklin Gothic</option>
+                <option value="Bookman Old Style">Bookman</option>
+                <option value="Garamond">Garamond</option>
+            </select>
+        </label>
+        <label>Taille : <input type="number" id="header-size" value="26" min="10" max="50" oninput="updateHeaderStyle()"></label>
+        <label>Couleur : <input type="color" id="header-color" value="#333333" onchange="updateHeaderStyle()"></label>
+        <div style="display:flex; gap:10px; margin: 5px 0;">
+            <label><input type="checkbox" id="header-bold" onchange="updateHeaderStyle()"> Gras</label>
+            <label><input type="checkbox" id="header-italic" onchange="updateHeaderStyle()"> Italique</label>
+        </div>
+        <label>Style WordArt :
+            <select id="header-wordart" onchange="updateHeaderStyle()">
+                <option value="none">Normal</option>
+                <option value="wa-gradient">Dégradé</option>
+                <option value="wa-neon">Néon</option>
+                <option value="wa-3d">3D</option>
+                <option value="wa-outline">Contour</option>
+                <option value="wa-shadow">Ombre</option>
+            </select>
+        </label>
+
+        <hr>
+        <h4>Style du Tableau</h4>
+        <label>Police : 
+            <select id="table-font" onchange="updateTableStyle()">
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier New</option>
                 <option value="Georgia">Georgia</option>
             </select>
         </label>
-        <label>Taille titre (px) : <input type="number" id="header-size" value="26" min="10" max="50" oninput="updateHeaderStyle()"></label>
-        <label>Couleur : <input type="color" id="header-color" value="#333333" onchange="updateHeaderStyle()"></label>
-        <label><input type="checkbox" id="header-wordart" onchange="updateHeaderStyle()"> Effet WordArt</label>
+        <label>Taille texte : <input type="number" id="table-size" value="14" min="8" max="24" oninput="updateTableStyle()"></label>
+        <label>Couleur texte : <input type="color" id="table-color" value="#000000" onchange="updateTableStyle()"></label>
+        <label>Couleur cases : <input type="color" id="table-cell-color" value="#ffffff"></label>
+        <button class="btn-action" onclick="toggleCellSelection()" id="btn-select-cells" style="background:#555;">Activer Sélection Cases</button>
+        <button class="btn-action" onclick="applyCellColor()" style="background:#2196F3;">Colorier Cases Sélectionnées</button>
     </div>
 
     <!-- MODULE DEVIS -->
@@ -40,7 +75,7 @@
         <header class="entete">
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-gauche')">
-                <img id="img-gauche" src="icons/icon-192x192.png" alt="Logo Gauche">
+                <img id="img-gauche" src="icon-192x192.png" alt="Logo Gauche">
             </div>
             <div class="entete-centre header-target">
                 <h1>Agence de Publicité</h1>
@@ -52,23 +87,30 @@
             </div>
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-droite')">
-                <img id="img-droite" src="icons/icon-192x192.png" alt="Logo Droite">
+                <img id="img-droite" src="icon-192x192.png" alt="Logo Droite">
             </div>
         </header>
 
         <hr>
 
-        <div class="titre-section">
-            <h3>DEVIS PROFORMA N° <input type="text" value="530" class="input-inline" style="width: 50px;"></h3>
-            <h3>Kananga, le <input type="date" class="input-inline"></h3>
+        <!-- Nouvelle disposition demandée -->
+        <div class="doc-header-info">
+            <div class="info-row right-align">
+                <h3>Kananga, le <input type="date" class="input-inline"></h3>
+            </div>
+            <div class="info-row left-align">
+                <h3>DEVIS PROFORMA N° <input type="text" value="530" class="input-inline" style="width: 60px;"></h3>
+            </div>
+            <div class="info-row flex-row">
+                <strong>TRAVAIL A REALISER :</strong> 
+                <textarea class="input-textarea auto-resize" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">RAFRAICHISSEMENT BATIMENTS : MISE DE LA PEINTURE (INTERIEUR) KAMAYI</textarea>
+            </div>
+            <div class="info-row">
+                <strong>CLIENT :</strong> <input type="text" value="SOCOC" class="input-inline" style="width: 200px;">
+            </div>
         </div>
 
-        <div class="travail-section">
-            <p><strong>TRAVAIL A REALISER :</strong> <input type="text" value="RAFRAICHISSEMENT BATIMENTS : MISE DE LA PEINTURE (INTERIEUR) KAMAYI" class="input-full"></p>
-            <p><strong>CLIENT :</strong> <input type="text" value="SOCOC" class="input-inline"></p>
-        </div>
-
-        <table id="table-devis">
+        <table id="table-devis" class="custom-table">
             <thead>
                 <tr>
                     <th>N°</th>
@@ -86,8 +128,10 @@
         <div class="totaux-section">
             <table class="table-totaux">
                 <tr><td>TOTAL</td><td id="dev-total">0</td></tr>
-                <tr><td>MAINS D'ŒUVRE</td><td><input type="number" id="dev-main-oeuvre" value="161.4" oninput="calculerTotaux('devis')"></td></tr>
-                <tr><td>TOTAUX</td><td id="dev-totaux">0</td></tr>
+                <tr>
+                    <td>MAINS D'ŒUVRE (%) <input type="number" id="dev-main-oeuvre-pct" value="20" style="width: 50px;" oninput="calculerTotaux('devis')"> %</td>
+                    <td><input type="number" id="dev-main-oeuvre-val" value="0" readonly style="background:#eee;"></td>
+                </tr>
                 <tr><td><strong>COUT GLOBAL</strong></td><td><strong id="dev-global">0</strong></td></tr>
             </table>
         </div>
@@ -98,7 +142,8 @@
             <p>Fait à <input type="text" value="Kananga" class="input-inline" style="width: 100px;">, le <input type="date" class="input-inline"></p>
             <p class="nom-signataire">Dedick MPIANA</p>
             <div class="canvas-container">
-                <canvas id="canvas-devis" class="signature-pad"></canvas>
+                <!-- Canvas avec dimensions fixes pour éviter le bug -->
+                <canvas id="canvas-devis" class="signature-pad" width="300" height="120"></canvas>
                 <button class="no-print clear-btn" onclick="clearCanvas('canvas-devis')">Effacer</button>
             </div>
         </div>
@@ -109,7 +154,7 @@
         <header class="entete">
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-gauche-f')">
-                <img id="img-gauche-f" src="icons/icon-192x192.png" alt="Logo Gauche">
+                <img id="img-gauche-f" src="icon-192x192.png" alt="Logo Gauche">
             </div>
             <div class="entete-centre header-target">
                 <h1>Agence de Publicité</h1>
@@ -121,19 +166,26 @@
             </div>
             <div class="logo-box">
                 <input type="file" accept="image/*" class="no-print file-input" onchange="previewImage(this, 'img-droite-f')">
-                <img id="img-droite-f" src="icons/icon-192x192.png" alt="Logo Droite">
+                <img id="img-droite-f" src="icon-192x192.png" alt="Logo Droite">
             </div>
         </header>
 
         <hr>
         
-        <h2 class="text-center">FACTURE N°<input type="text" value="923" class="input-inline" style="width: 60px;"></h2>
-        
-        <div class="travail-section">
-            <p><strong>Concerne :</strong> <input type="text" value="Ajout d'argent sur les travaux de peinture suite à la hausse des prix sur le marché, au siège FBNBank sarl à Kananga" class="input-full"></p>
+        <div class="doc-header-info">
+            <div class="info-row right-align">
+                <h3>Kananga, le <input type="date" value="2022-10-01" class="input-inline"></h3>
+            </div>
+            <div class="info-row left-align">
+                <h3>FACTURE N° <input type="text" value="923" class="input-inline" style="width: 60px;"></h3>
+            </div>
+            <div class="info-row flex-row">
+                <strong>CONCERNE :</strong> 
+                <textarea class="input-textarea auto-resize" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">Ajout d'argent sur les travaux de peinture suite à la hausse des prix sur le marché, au siège FBNBank sarl à Kananga</textarea>
+            </div>
         </div>
 
-        <table id="table-facture">
+        <table id="table-facture" class="custom-table">
             <thead>
                 <tr>
                     <th>N°</th>
@@ -152,7 +204,10 @@
         <div class="totaux-section">
             <table class="table-totaux">
                 <tr><td>Sous-total</td><td id="fact-sous-total">0</td></tr>
-                <tr><td>Main d'œuvre</td><td><input type="number" id="fact-main-oeuvre" value="31" oninput="calculerTotaux('facture')"></td></tr>
+                <tr>
+                    <td>Main d'œuvre (%) <input type="number" id="fact-main-oeuvre-pct" value="10" style="width: 50px;" oninput="calculerTotaux('facture')"> %</td>
+                    <td><input type="number" id="fact-main-oeuvre-val" value="0" readonly style="background:#eee;"></td>
+                </tr>
                 <tr><td><strong>TOTAL A PAYER</strong></td><td><strong id="fact-global">0</strong></td></tr>
             </table>
         </div>
@@ -160,24 +215,26 @@
         <p class="montant-lettres"><em>Nous disons : <span id="fact-lettres"></span></em></p>
 
         <div class="signature-section facture-sign">
-            <p>Fait à <input type="text" value="Kananga" class="input-inline" style="width: 100px;">, le <input type="date" value="2022-10-01" class="input-inline"></p>
-            <p>Pour DEMPI MOVING<br><strong>Dedick MPIANA</strong><br>Artiste décorateur sérigraphe</p>
-            
-            <div class="signature-area">
-                <div class="canvas-container">
-                    <canvas id="canvas-facture" class="signature-pad"></canvas>
-                    <button class="no-print clear-btn" onclick="clearCanvas('canvas-facture')">Effacer</button>
+            <!-- Nouvelle disposition : Texte à gauche, Sceau et Signature à droite -->
+            <div class="facture-bottom">
+                <div class="facture-text">
+                    <p>Pour DEMPI MOVING<br><strong>Dedick MPIANA</strong><br>Artiste décorateur sérigraphe</p>
                 </div>
-                <!-- Case du Sceau -->
-                <div class="stamp-container no-print">
-                    <label>Importer Sceau/Cachet :</label>
-                    <input type="file" accept="image/*" onchange="previewImage(this, 'img-sceau')">
+                <div class="facture-sig-zone">
+                    <div class="stamp-area" onclick="document.getElementById('file-sceau').click()">
+                        <input type="file" id="file-sceau" accept="image/*" style="display:none;" onchange="previewImage(this, 'img-sceau')">
+                        <img id="img-sceau" src="" alt="Sceau" style="display:none;">
+                        <span class="no-print" id="stamp-placeholder">Cliquez pour ajouter le sceau</span>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-facture" class="signature-pad" width="300" height="120"></canvas>
+                        <button class="no-print clear-btn" onclick="clearCanvas('canvas-facture')">Effacer</button>
+                    </div>
                 </div>
-                <img id="img-sceau" src="" alt="" class="stamp-img">
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
 </body>
-</html>
+    </html>
